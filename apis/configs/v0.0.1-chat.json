@@ -1,0 +1,8 @@
+{
+    "deploy_port": 8001,
+    "chat" : {
+        "model_name" : "eunjin/kogpt2-finetuned-wellness",
+        "revision" : "main",
+        "device": "mps:0"
+    }
+}
