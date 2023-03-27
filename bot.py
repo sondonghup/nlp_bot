@@ -4,12 +4,13 @@ import requests
 import googleapiclient.discovery
 import yt_dlp as youtube_dl
 from dotenv import load_dotenv
-from datetime import datetime
 import time
-from discord import Embed
 from melonapi import scrapeMelon
 import json
 import os
+
+from funcs.food_func import food_list
+from funcs.weather_func import get_all_region_weather, get_region_weather
 
 TOKEN = os.environ['discord_token']
 api_service_name = "youtube"
@@ -31,7 +32,6 @@ class youtube_quiz:
 async def on_ready():
     print(f'Login bot: {bot.user}')
 
-
 @bot.command()
 async def sent(ctx,*,player):
     '''
@@ -40,9 +40,7 @@ async def sent(ctx,*,player):
     url = "http://localhost:8000/sent"
     data = {"text": f"{player}"}
     response = requests.post(url, json=data)
-
     await ctx.channel.send(response.json()['sentiment'])
-
 
 @bot.command()
 async def chat(ctx,*,player):
@@ -55,10 +53,7 @@ async def chat(ctx,*,player):
     response = requests.post(url, json=data)
     end = time.time()
     print(player + response.json()['chatting'])
-    
-
     await ctx.send(f'[{end-start}초가 걸립니다.]\n'+response.json()['chatting'])
-
 
 @ bot.command()
 async def play(ctx, *,player):
@@ -83,7 +78,6 @@ async def play(ctx, *,player):
     discord.opus.load_opus('libopus.0.dylib')
     voice = bot.voice_clients[0]
     voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
-
 
 @ bot.command()
 async def join(ctx):
@@ -135,51 +129,46 @@ async def game(ctx, *, player):
             print('정답입니다!')
             continue
 
-async def countdown(isLong): # 카운트 다운
-    leftsec = 40
-    limit = 0
-    while True:
-        if limit > 100: return
-        leftsec -= 1
-        if leftsec < 0: leftsec = 0
-        quizUIFrame._quizLeftTime = leftSec
-        await quizUIFrame.update()
-
-
-
 @ bot.command()
-async def weather(ctx):
-    weathers = ''
-    today = datetime.today().strftime('%Y%m%d')
-    url = f'https://weather.naver.com/today/api/nation/{today}/now'
-    response = requests.get(url)
-    result = response.json()
+async def food(ctx, *, player):
+    response = food_list(player)
+    restaurant_list = ''
     
-    for area in result.keys():
-        region = result[area]['regionName']
-        temperature = result[area]['tmpr']
-        weather = result[area]['wetrTxt']
-        weathers += f'[{region}] 기온 : {temperature} | 날씨 : {weather}\n'
-        print(f'[{region}] 기온 : {temperature} 날씨 : {weather}')
-    await ctx.send(weathers)
+    for restaurant in response['restaurants']:
+        name = restaurant['name']
+        distance = restaurant['distance']
+        review_avg = restaurant['review_avg']
+        restaurant_list += f'[{name}] 평점 : {review_avg} 거리 : '+'{0:.1f}'.format(distance)+'km\n'
+    await ctx.send(restaurant_list)
 
 @ bot.command()
-async def test(ctx):
-    juice=discord.Embed(color=0x3498db)
-    juice.set_author(name="Please wait")
-    # juice5=discord.Embed(title="⚠️ Error, are you trying to ban anyone?", description="Usage: !ban @user (reason)", color=discord.Colour.gold())
-    msg = await ctx.send(embed=juice)
-    # await msg.edit(embed=juice5)
+async def weather(ctx, *, player):
+    if player == '전국':
+        all_region_weather = get_all_region_weather()
+        weathers = ''
+        for area in all_region_weather.keys():
+            region = all_region_weather[area]['regionName']
+            temperature = all_region_weather[area]['tmpr']
+            weather = all_region_weather[area]['wetrTxt']
+            weathers += f'[{region}] 기온 : {temperature} | 날씨 : {weather}\n'
+        await ctx.send(weathers)
 
-@ bot.command()
-async def on_ready(ctx):
-    print('VC is online!')
-    embed = discord.Embed(title="Screenshare", description="Cilck this link to screenshare", colour=discord.Color.blue(), url=f"https://discordapp.com/channels/{ctx.guild.id}/{ctx.author.voice.channel.id}")
-
-    embed.add_field(name="Screenshare here", value=f"https://discordapp.com/channels/{ctx.guild.id}/{ctx.author.voice.channel.id}")
-    # embed.set_thumbnail(url=doob_logo)
-
-    await ctx.send(embed=embed)
+    else:
+        region_weather = get_region_weather(player)
+        weathers = region_weather['pastWetrCalendarList'][0]['pastWetrData']['lareaNm'] + region_weather['pastWetrCalendarList'][0]['pastWetrData']['mareaNm'] +'\n'
+        for weather in region_weather['pastWetrCalendarList'][-7:]:
+            try:
+                year = weather['year']
+                month = weather['month']
+                date = weather['date']
+                week = weather['solarWeek']
+                weather_text = weather['pastWetrData']['wetrTxt']
+                min_tmpr = weather['pastWetrData']['minTmpr']
+                max_tmpr = weather['pastWetrData']['maxTmpr']
+                weathers += f'[{year}년 {month}월 {date}일 {week}요일] 날씨 : {weather_text} | 최저 온도 : {min_tmpr} | 최고 온도 : {max_tmpr}\n'
+            except:
+                continue
+        await ctx.send(weathers)
 
 @ bot.command()
 async def quit(ctx, player):
