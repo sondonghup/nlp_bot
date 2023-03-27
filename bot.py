@@ -131,19 +131,24 @@ async def game(ctx, *, player):
 
 @ bot.command()
 async def food(ctx, *, player):
-    response = food_list(player)
-    restaurant_list = ''
-    
-    for restaurant in response['restaurants']:
-        name = restaurant['name']
-        distance = restaurant['distance']
-        review_avg = restaurant['review_avg']
-        restaurant_list += f'[{name}] 평점 : {review_avg} 거리 : '+'{0:.1f}'.format(distance)+'km\n'
-    await ctx.send(restaurant_list)
+    if player == '':
+        await ctx.send('지역을 입력해 주세요')
+    else :
+        response = food_list(player)
+        restaurant_list = ''
+        response = sorted(response['restaurants'], key= lambda x: x['distance'])
+        for restaurant in response['restaurants']:
+            name = restaurant['name']
+            distance = restaurant['distance']
+            review_avg = restaurant['review_avg']
+            restaurant_list += f'[{name}] 평점 : {review_avg} 거리 : '+'{0:.1f}'.format(distance)+'km\n'
+        await ctx.send(restaurant_list)
 
 @ bot.command()
 async def weather(ctx, *, player):
-    if player == '전국':
+    if player == '':
+        await ctx.send('전국 날씨는 $weather 전국, 지방 날씨는 $weather 주소 로 입력해주세요.')
+    elif player == '전국':
         all_region_weather = get_all_region_weather()
         weathers = ''
         for area in all_region_weather.keys():
@@ -156,7 +161,7 @@ async def weather(ctx, *, player):
     else:
         region_weather = get_region_weather(player)
         weathers = region_weather['pastWetrCalendarList'][0]['pastWetrData']['lareaNm'] + region_weather['pastWetrCalendarList'][0]['pastWetrData']['mareaNm'] +'\n'
-        for weather in region_weather['pastWetrCalendarList'][-7:]:
+        for weather in region_weather['pastWetrCalendarList'][-10:]:
             try:
                 year = weather['year']
                 month = weather['month']
