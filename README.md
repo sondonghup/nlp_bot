@@ -25,4 +25,5 @@
 - chat (with tts)
 - youtube music
 - weather alert
+- food alert
 ```
