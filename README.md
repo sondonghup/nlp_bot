@@ -13,7 +13,10 @@
 │   │   ├── chat.py
 │   │   └── sent.py
 │   └── sent_deploy.py
-└── bot.py
+├── bot.py
+└── funcs
+    ├── food_func.py
+    └── weather_func.py
 ```
 
 ### func
