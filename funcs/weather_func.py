@@ -15,7 +15,7 @@ def get_region_code(address):
     location = requests.get(url)
     return location.json()['items'][0][0][1][0]
 
-def get_region_weather(address):
+def get_region_weather_html(address):
 
     region_code = get_region_code(address)
 
@@ -54,6 +54,12 @@ def get_region_weather(address):
     }
 
     response = requests.get(f'https://weather.naver.com/today/{region_code}', cookies=cookies, headers=headers)
+        
+    return response
+
+def get_region_daily_weather(address):
+
+    response = get_region_weather_html(address)
 
     html = bs(response.text, 'html.parser')
     today_table = html.find('div', {'class' : 'weather_table_wrap'})
@@ -80,5 +86,28 @@ def get_region_weather(address):
             date = data_ymdt[6:8]
             hour = data_ymdt[8:10]
             weathers += f'[{year}년 {month}월 {date}일 {hour}시] 온도 : {data_tmpr} | 날씨 : {data_wetr_text}\n'
-        
+
+    return weathers
+
+def get_region_week_weather(address):
+
+    response = get_region_weather_html(address)
+
+    html = bs(response.text, 'html.parser')
+    today_table = html.find('div', {'class' : 'card card_week'})
+    weathers = ''
+    today_tables = today_table.find_all('li', {'class' : 'week_item'})
+    for today_table in today_tables:
+        today = today_table.find('span', {'class' : 'date'}).text
+        rainfall = today_table.find_all('span', {'class' : 'rainfall'})
+        morning_rainfall = rainfall[0].text.replace('강수확률','')
+        afternoon_rainfall = rainfall[1].text.replace('강수확률','')
+        weather = today_table.find_all('span', {'class' : 'weather_inner'})
+        morning_weather = weather[0]['data-wetr-txt']
+        afternoon_weather = weather[1]['data-wetr-txt']
+        lowest_tmpr = today_table.find('span', {'class' : 'lowest'}).text.replace('최저기온','')
+        highest_tmpr = today_table.find('span', {'class' : 'highest'}).text.replace('최고기온','')
+        day = today_table.find('strong', {'class' : 'day'}).text
+        weathers += f'[{today} {day}] \n오전 강수율 : {morning_rainfall} | 오후 강수율 : {afternoon_rainfall} | 최저 기온 : {lowest_tmpr} | 최고 기온 : {highest_tmpr} | 오전 날씨 : {morning_weather} | 오후 날씨 : {afternoon_weather}\n'
+
     return weathers

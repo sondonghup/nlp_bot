@@ -10,7 +10,7 @@ import json
 import os
 
 from funcs.food_func import food_list
-from funcs.weather_func import get_all_region_weather, get_region_weather
+from funcs.weather_func import get_region_daily_weather, get_region_week_weather, get_all_region_weather
 
 TOKEN = os.environ['discord_token']
 api_service_name = "youtube"
@@ -161,8 +161,13 @@ async def weather(ctx, *, player):
         await ctx.send(weathers)
 
     else:
-        region_weather = get_region_weather(player)
-        await ctx.send(region_weather)
+        region_daily_weather = get_region_daily_weather(player)
+        await ctx.send(region_daily_weather)
+
+@ bot.command()
+async def weekweather(ctx, player):
+    region_week_weather = get_region_week_weather(player)
+    await ctx.send(region_week_weather)
 
 @ bot.command()
 async def quit(ctx, player):
