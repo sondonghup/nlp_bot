@@ -169,6 +169,16 @@ async def weekweather(ctx, player):
     region_week_weather = get_region_week_weather(player)
     await ctx.send(region_week_weather)
 
+@bot.command()
+async def summary(ctx,*,player):
+    '''
+    [summarization]
+    '''
+    url = "http://localhost:8002/summarize"
+    data = {"text": f"{player}"}
+    response = requests.post(url, json=data)
+    await ctx.channel.send('[요약 입니다.]\n' + response.json()['summarizing'])
+
 @ bot.command()
 async def quit(ctx, player):
     channel = ctx.message.author.voice.channel
