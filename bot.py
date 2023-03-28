@@ -68,6 +68,7 @@ async def play(ctx, *,player):
         maxResults = 1
     )
     response3 = request3.execute()
+    print(response3)
     chan_id = response3['items'][0]['id']['videoId']
     ydl_opts = {'format' : 'bestaudio'}
     player = f'https://www.youtube.com/watch?v={chan_id}'
@@ -78,6 +79,7 @@ async def play(ctx, *,player):
     discord.opus.load_opus('libopus.0.dylib')
     voice = bot.voice_clients[0]
     voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
+    await ctx.send(f'{player}')
 
 @ bot.command()
 async def join(ctx):
@@ -137,7 +139,7 @@ async def food(ctx, *, player):
         response = food_list(player)
         restaurant_list = ''
         response = sorted(response['restaurants'], key= lambda x: x['distance'])
-        for restaurant in response['restaurants']:
+        for restaurant in response:
             name = restaurant['name']
             distance = restaurant['distance']
             review_avg = restaurant['review_avg']
@@ -160,20 +162,7 @@ async def weather(ctx, *, player):
 
     else:
         region_weather = get_region_weather(player)
-        weathers = region_weather['pastWetrCalendarList'][0]['pastWetrData']['lareaNm'] + region_weather['pastWetrCalendarList'][0]['pastWetrData']['mareaNm'] +'\n'
-        for weather in region_weather['pastWetrCalendarList'][-10:]:
-            try:
-                year = weather['year']
-                month = weather['month']
-                date = weather['date']
-                week = weather['solarWeek']
-                weather_text = weather['pastWetrData']['wetrTxt']
-                min_tmpr = weather['pastWetrData']['minTmpr']
-                max_tmpr = weather['pastWetrData']['maxTmpr']
-                weathers += f'[{year}년 {month}월 {date}일 {week}요일] 날씨 : {weather_text} | 최저 온도 : {min_tmpr} | 최고 온도 : {max_tmpr}\n'
-            except:
-                continue
-        await ctx.send(weathers)
+        await ctx.send(region_weather)
 
 @ bot.command()
 async def quit(ctx, player):

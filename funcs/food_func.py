@@ -5,6 +5,7 @@ def geocoding(address):
     geolocoder = Nominatim(user_agent = 'South Korea', timeout=None)
     geo = geolocoder.geocode(address)
     location = {"lat": str(geo.latitude), "lng": str(geo.longitude)}
+    print(location)
     return location['lat'], location['lng']
 
 def food_list(address):
