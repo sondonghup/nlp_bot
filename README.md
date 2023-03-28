@@ -8,11 +8,14 @@
 │   ├── chat_deploy.py
 │   ├── configs
 │   │   ├── v0.0.1-chat.json
-│   │   └── v0.0.1-sent.json
+│   │   ├── v0.0.1-sent.json
+│   │   └── v0.0.1-summarize.json
 │   ├── models
 │   │   ├── chat.py
-│   │   └── sent.py
-│   └── sent_deploy.py
+│   │   ├── sent.py
+│   │   └── summarize.py
+│   ├── sent_deploy.py
+│   └── summarize_deploy.py
 ├── bot.py
 └── funcs
     ├── food_func.py
