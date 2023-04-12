@@ -20,7 +20,7 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=DEVELOPER_KEY)
 
 load_dotenv()
-bot = commands.Bot(command_prefix='$', intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=['$','!'], intents=discord.Intents.all())
 
 class youtube_quiz:
     def __init__(self, quizUIFrame, voice, owner) -> None:
