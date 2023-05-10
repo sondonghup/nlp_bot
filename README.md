@@ -1,4 +1,7 @@
 # RECA bot
+***
+I added several nlp tasks and other necessary functions to the discord bot by api.
+If I think of any fun features, I will continue to add them.
 
 ### summary
 ```
